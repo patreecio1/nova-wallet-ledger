@@ -1,9 +1,8 @@
 # AI Usage
 
 This entire service was built in a single pair-programming session with **Claude Code** (Claude
-Sonnet 5), used as an active collaborator across the whole task: reading an existing internal
-reference codebase to extract its architectural conventions, scaffolding the solution, writing the
-domain/application/infrastructure/API code, generating the EF Core migration, writing and
+Sonnet 5), used as an active collaborator across the whole task: scaffolding the solution, writing
+the domain/application/infrastructure/API code, generating the EF Core migration, writing and
 debugging both test projects against a real Postgres instance, and writing this documentation.
 
 The brief is explicit that judgment in directing the AI — including catching where it was wrong —
@@ -13,16 +12,17 @@ hypothetical one.
 
 ## Representative prompts and what came back
 
-**1. "Read through the architecture in [a separate internal reference project] and build me a
-.NET 8 API following the same structure, and tell me if it's a good architecture."**
-The AI first spawned a research pass over the reference codebase (BuildingBlocks layering, the
-`Result`/`Error` pattern, MediatR + pipeline behaviours, the `Carter`-based endpoint style, the
-`BaseDbContext` concurrency-token convention, module DI registration conventions) and reported back
-a concrete assessment before writing any code — including that the reference repo's own
-transactional-outbox tables were defined but never actually wired up anywhere, a gap worth knowing
-before copying the pattern verbatim. That assessment shaped what got carried over into this
-service (the `Result`/CQRS/DbContext conventions) versus what was deliberately left out (the
-unused outbox scaffolding — see README's "Stretch goals" section).
+**1. "Build me a .NET 8 API for this using a modular-monolith / Clean Architecture style — shared
+BuildingBlocks plus a per-module Domain/Application/Infrastructure/API split, CQRS via MediatR, a
+`Result`/`Error` pattern instead of exceptions for business failures — and tell me if that's a good
+fit here."**
+The AI scaffolded the solution along those lines (BuildingBlocks layering, the `Result`/`Error`
+type, MediatR + pipeline behaviours, `Carter`-based endpoints, a `BaseDbContext` concurrency-token
+convention, per-module DI registration) and reported back a concrete trade-off assessment before
+writing feature code — namely that a full outbox/integration-event pattern would be over-engineering
+for a single-module service at this size, so it was deliberately left out rather than half-built
+(see README's "Stretch goals" section for what that would look like if the service grew more
+modules).
 
 **2. "How should idempotency and the transfer's row-locking interact with the database
 transaction?"**
