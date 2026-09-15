@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\NovaWallet.Wallet.Domain\NovaWallet.Wallet.Domain.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\NovaWallet.BuildingBlocks.Application\NovaWallet.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\NovaWallet.BuildingBlocks.Domain\NovaWallet.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

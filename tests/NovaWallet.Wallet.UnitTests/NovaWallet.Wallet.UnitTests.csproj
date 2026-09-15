@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Modules\Wallet\NovaWallet.Wallet.Application\NovaWallet.Wallet.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Wallet\NovaWallet.Wallet.Domain\NovaWallet.Wallet.Domain.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\NovaWallet.BuildingBlocks.Application\NovaWallet.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\NovaWallet.BuildingBlocks.Domain\NovaWallet.BuildingBlocks.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

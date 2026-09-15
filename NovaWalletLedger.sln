@@ -1,0 +1,104 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7FBCB05F-0DD2-4107-A0F1-4BCFB7A84F9F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{15F11A08-404E-4371-93E2-D1AE6281DDE1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.BuildingBlocks.Domain", "src\BuildingBlocks\NovaWallet.BuildingBlocks.Domain\NovaWallet.BuildingBlocks.Domain.csproj", "{76ECBBA0-C793-402D-85F6-BF13842BCFF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.BuildingBlocks.Application", "src\BuildingBlocks\NovaWallet.BuildingBlocks.Application\NovaWallet.BuildingBlocks.Application.csproj", "{93C043D1-9C8C-466D-8A68-2550BEEE1189}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.BuildingBlocks.Infrastructure", "src\BuildingBlocks\NovaWallet.BuildingBlocks.Infrastructure\NovaWallet.BuildingBlocks.Infrastructure.csproj", "{F12AA705-A36F-45FD-A1A6-A89B8D5CA622}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{6F509E13-8FBD-4EFE-AEC2-E2E03BCAA86D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wallet", "Wallet", "{04376625-86C4-414A-993C-63DDEAD5B84B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.Wallet.Domain", "src\Modules\Wallet\NovaWallet.Wallet.Domain\NovaWallet.Wallet.Domain.csproj", "{AF224820-93E1-47FA-A98D-DF3029C23DE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.Wallet.Application", "src\Modules\Wallet\NovaWallet.Wallet.Application\NovaWallet.Wallet.Application.csproj", "{7CFF8FD2-BB8A-4C89-9183-E4DC52E21A29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.Wallet.Infrastructure", "src\Modules\Wallet\NovaWallet.Wallet.Infrastructure\NovaWallet.Wallet.Infrastructure.csproj", "{9925980B-5CB0-49AD-9FD0-3ACA3349D2E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.Wallet.API", "src\Modules\Wallet\NovaWallet.Wallet.API\NovaWallet.Wallet.API.csproj", "{0E84F70D-D79C-41FB-A7E1-C581B2C3C0B8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{9B99A3F0-A64E-4158-9FFF-2C334CF42A33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.Api", "src\Api\NovaWallet.Api\NovaWallet.Api.csproj", "{49B91F10-CC5D-4C25-8632-081DF84BB8DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7590E36F-ADC4-4F44-B228-1DA7DC451C19}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.Wallet.UnitTests", "tests\NovaWallet.Wallet.UnitTests\NovaWallet.Wallet.UnitTests.csproj", "{463DF145-9707-4BAC-A306-22B90DC4A70C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaWallet.IntegrationTests", "tests\NovaWallet.IntegrationTests\NovaWallet.IntegrationTests.csproj", "{20714C25-4B64-45B6-B868-31E6049E2F20}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{76ECBBA0-C793-402D-85F6-BF13842BCFF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76ECBBA0-C793-402D-85F6-BF13842BCFF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76ECBBA0-C793-402D-85F6-BF13842BCFF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76ECBBA0-C793-402D-85F6-BF13842BCFF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93C043D1-9C8C-466D-8A68-2550BEEE1189}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93C043D1-9C8C-466D-8A68-2550BEEE1189}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93C043D1-9C8C-466D-8A68-2550BEEE1189}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93C043D1-9C8C-466D-8A68-2550BEEE1189}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F12AA705-A36F-45FD-A1A6-A89B8D5CA622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F12AA705-A36F-45FD-A1A6-A89B8D5CA622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F12AA705-A36F-45FD-A1A6-A89B8D5CA622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F12AA705-A36F-45FD-A1A6-A89B8D5CA622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF224820-93E1-47FA-A98D-DF3029C23DE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF224820-93E1-47FA-A98D-DF3029C23DE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF224820-93E1-47FA-A98D-DF3029C23DE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF224820-93E1-47FA-A98D-DF3029C23DE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CFF8FD2-BB8A-4C89-9183-E4DC52E21A29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CFF8FD2-BB8A-4C89-9183-E4DC52E21A29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CFF8FD2-BB8A-4C89-9183-E4DC52E21A29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CFF8FD2-BB8A-4C89-9183-E4DC52E21A29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9925980B-5CB0-49AD-9FD0-3ACA3349D2E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9925980B-5CB0-49AD-9FD0-3ACA3349D2E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9925980B-5CB0-49AD-9FD0-3ACA3349D2E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9925980B-5CB0-49AD-9FD0-3ACA3349D2E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E84F70D-D79C-41FB-A7E1-C581B2C3C0B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E84F70D-D79C-41FB-A7E1-C581B2C3C0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E84F70D-D79C-41FB-A7E1-C581B2C3C0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E84F70D-D79C-41FB-A7E1-C581B2C3C0B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49B91F10-CC5D-4C25-8632-081DF84BB8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49B91F10-CC5D-4C25-8632-081DF84BB8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49B91F10-CC5D-4C25-8632-081DF84BB8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49B91F10-CC5D-4C25-8632-081DF84BB8DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{463DF145-9707-4BAC-A306-22B90DC4A70C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{463DF145-9707-4BAC-A306-22B90DC4A70C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{463DF145-9707-4BAC-A306-22B90DC4A70C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{463DF145-9707-4BAC-A306-22B90DC4A70C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20714C25-4B64-45B6-B868-31E6049E2F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20714C25-4B64-45B6-B868-31E6049E2F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20714C25-4B64-45B6-B868-31E6049E2F20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20714C25-4B64-45B6-B868-31E6049E2F20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{15F11A08-404E-4371-93E2-D1AE6281DDE1} = {7FBCB05F-0DD2-4107-A0F1-4BCFB7A84F9F}
+		{76ECBBA0-C793-402D-85F6-BF13842BCFF2} = {15F11A08-404E-4371-93E2-D1AE6281DDE1}
+		{93C043D1-9C8C-466D-8A68-2550BEEE1189} = {15F11A08-404E-4371-93E2-D1AE6281DDE1}
+		{F12AA705-A36F-45FD-A1A6-A89B8D5CA622} = {15F11A08-404E-4371-93E2-D1AE6281DDE1}
+		{6F509E13-8FBD-4EFE-AEC2-E2E03BCAA86D} = {7FBCB05F-0DD2-4107-A0F1-4BCFB7A84F9F}
+		{04376625-86C4-414A-993C-63DDEAD5B84B} = {6F509E13-8FBD-4EFE-AEC2-E2E03BCAA86D}
+		{AF224820-93E1-47FA-A98D-DF3029C23DE4} = {04376625-86C4-414A-993C-63DDEAD5B84B}
+		{7CFF8FD2-BB8A-4C89-9183-E4DC52E21A29} = {04376625-86C4-414A-993C-63DDEAD5B84B}
+		{9925980B-5CB0-49AD-9FD0-3ACA3349D2E5} = {04376625-86C4-414A-993C-63DDEAD5B84B}
+		{0E84F70D-D79C-41FB-A7E1-C581B2C3C0B8} = {04376625-86C4-414A-993C-63DDEAD5B84B}
+		{9B99A3F0-A64E-4158-9FFF-2C334CF42A33} = {7FBCB05F-0DD2-4107-A0F1-4BCFB7A84F9F}
+		{49B91F10-CC5D-4C25-8632-081DF84BB8DF} = {9B99A3F0-A64E-4158-9FFF-2C334CF42A33}
+		{463DF145-9707-4BAC-A306-22B90DC4A70C} = {7590E36F-ADC4-4F44-B228-1DA7DC451C19}
+		{20714C25-4B64-45B6-B868-31E6049E2F20} = {7590E36F-ADC4-4F44-B228-1DA7DC451C19}
+	EndGlobalSection
+EndGlobal

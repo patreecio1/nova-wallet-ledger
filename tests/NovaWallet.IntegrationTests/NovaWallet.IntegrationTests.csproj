@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Api\NovaWallet.Api\NovaWallet.Api.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Wallet\NovaWallet.Wallet.API\NovaWallet.Wallet.API.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Wallet\NovaWallet.Wallet.Application\NovaWallet.Wallet.Application.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Wallet\NovaWallet.Wallet.Domain\NovaWallet.Wallet.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Wallet\NovaWallet.Wallet.Infrastructure\NovaWallet.Wallet.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\NovaWallet.BuildingBlocks.Application\NovaWallet.BuildingBlocks.Application.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\NovaWallet.BuildingBlocks.Domain\NovaWallet.BuildingBlocks.Domain.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\NovaWallet.BuildingBlocks.Infrastructure\NovaWallet.BuildingBlocks.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
