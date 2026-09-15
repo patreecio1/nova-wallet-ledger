@@ -1,10 +1,10 @@
 # AI Usage
 
 This entire service was built in a single pair-programming session with **Claude Code** (Claude
-Sonnet 5), used as an active collaborator across the whole task: reading the existing SchoolOS
-codebase to extract its architectural conventions, scaffolding the solution, writing the domain/
-application/infrastructure/API code, generating the EF Core migration, writing and debugging both
-test projects against a real Postgres instance, and writing this documentation.
+Sonnet 5), used as an active collaborator across the whole task: reading an existing internal
+reference codebase to extract its architectural conventions, scaffolding the solution, writing the
+domain/application/infrastructure/API code, generating the EF Core migration, writing and
+debugging both test projects against a real Postgres instance, and writing this documentation.
 
 The brief is explicit that judgment in directing the AI — including catching where it was wrong —
 is what's being assessed, so this file documents real prompts from this session and a real
@@ -13,8 +13,8 @@ hypothetical one.
 
 ## Representative prompts and what came back
 
-**1. "Read through the architecture in `schoolos-backend` and build me a .NET 8 API following the
-same structure, and tell me if it's a good architecture."**
+**1. "Read through the architecture in [a separate internal reference project] and build me a
+.NET 8 API following the same structure, and tell me if it's a good architecture."**
 The AI first spawned a research pass over the reference codebase (BuildingBlocks layering, the
 `Result`/`Error` pattern, MediatR + pipeline behaviours, the `Carter`-based endpoint style, the
 `BaseDbContext` concurrency-token convention, module DI registration conventions) and reported back

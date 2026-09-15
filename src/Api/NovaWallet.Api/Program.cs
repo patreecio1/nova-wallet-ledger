@@ -122,8 +122,8 @@ builder.Services.AddHealthChecks()
 var app = builder.Build();
 
 // Applying migrations at startup keeps `docker compose up` a single command with no separate
-// migration step — acceptable for a service this size; a fleet of modules (like the source
-// SchoolOS codebase) would instead reflect over every registered DbContext and migrate each.
+// migration step — acceptable for a service this size; a larger modular monolith with many
+// modules would instead reflect over every registered DbContext and migrate each.
 using (var scope = app.Services.CreateScope())
 {
     await scope.ServiceProvider.GetRequiredService<WalletDbContext>().Database.MigrateAsync();

@@ -6,8 +6,8 @@ inbound NIP settlement), transfer between them, and query balance/statement — 
 
 ## Architecture
 
-This mirrors the architectural style of an existing internal modular-monolith codebase
-(SchoolOS) that was used as a structural reference for this take-home, scaled down to what a
+This follows a modular-monolith / Clean Architecture style — per-module Domain/Application/
+Infrastructure/API projects on top of a shared set of building blocks — scaled down to what a
 single bounded context actually needs:
 
 ```
