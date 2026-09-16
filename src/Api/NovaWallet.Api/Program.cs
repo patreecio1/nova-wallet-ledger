@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.RateLimiting;
 using Carter;
@@ -34,7 +35,17 @@ builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddBuildingBlocks();
 builder.Services.AddWalletModule(builder.Configuration);
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+// Deliberately no signing key ships in appsettings.json — only Issuer/Audience/lifetime live
+// there. The key itself must come from an environment variable or user-secrets (see README),
+// and this fails fast at startup with a clear message if it's missing or too short, rather than
+// silently booting with an empty/weak key.
+builder.Services.AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+    .Validate(
+        options => !string.IsNullOrWhiteSpace(options.SigningKey) && Encoding.UTF8.GetByteCount(options.SigningKey) >= 32,
+        "Jwt:SigningKey is missing or shorter than 32 bytes. Set it via the Jwt__SigningKey environment " +
+        "variable (docker-compose.yml already does this) or `dotnet user-secrets set \"Jwt:SigningKey\" \"...\"` for a local `dotnet run`.")
+    .ValidateOnStart();
 builder.Services.AddSingleton<JwtTokenService>();
 
 // JwtOptions is resolved from IOptions<JwtOptions> at the point JwtBearer actually needs it
@@ -72,7 +83,14 @@ builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddPolicy("transfer", httpContext => RateLimitPartition.GetFixedWindowLimiter(
-        partitionKey: httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+        // The JWT here never carries a "name"-typed claim (only "sub" and "role" — see
+        // JwtTokenService), so `User.Identity.Name` is always null and this used to silently
+        // fall back to IP for every authenticated caller, putting every customer behind the
+        // same NAT/gateway in one shared 30-req/min budget. Partition on the actual customer id
+        // claim instead, so the limit is genuinely per-customer.
+        partitionKey: httpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+            ?? httpContext.Connection.RemoteIpAddress?.ToString()
+            ?? "anonymous",
         factory: _ => new FixedWindowRateLimiterOptions
         {
             Window = TimeSpan.FromMinutes(1),

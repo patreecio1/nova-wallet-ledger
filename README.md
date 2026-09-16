@@ -67,10 +67,21 @@ concurrent requests." Three independent mechanisms combine to guarantee that for
 
 `xmin`-based optimistic concurrency is still configured on top of this as defense in depth (e.g.
 for `CreditWallet`, which locks a single row rather than needing a canonical multi-row order), but
-the pessimistic lock is what actually carries the transfer's correctness guarantee — see
-`TransferConcurrencyTests.Concurrent_transfers_that_would_overdraw_the_wallet_only_let_the_affordable_ones_through`,
-which fires 20 concurrent transfer requests against a wallet that can only afford 10, and asserts
-exactly 10 succeed and the final balance is exactly zero (never negative, nothing duplicated).
+the pessimistic lock is what actually carries the transfer's correctness guarantee. Four scenarios
+are proven against a real Postgres instance, not just asserted by inspection:
+
+- `TransferConcurrencyTests.Concurrent_transfers_that_would_overdraw_the_wallet_only_let_the_affordable_ones_through`
+  — 20 concurrent transfers against a wallet that can only afford 10; exactly 10 succeed, final
+  balance is exactly zero.
+- `AdditionalConcurrencyTests.Concurrent_credits_to_the_same_wallet_all_land_without_losing_any`
+  — 25 concurrent inbound credits to one wallet; none lost to a lost update.
+- `AdditionalConcurrencyTests.Opposite_direction_transfers_between_the_same_pair_never_deadlock_and_balances_reconcile`
+  — the specific scenario the ascending-Id lock order exists to prevent from deadlocking (A→B and
+  B→A fired concurrently, 15 each); all 30 succeed, both balances reconcile exactly.
+- `AdditionalConcurrencyTests.Concurrent_transfers_that_would_exceed_the_daily_outbound_limit_only_let_the_limit_through`
+  — with balance never the constraint, exactly enough transfers to reach the ₦500,000 WAT daily
+  cap succeed; every rejection is specifically `Wallet.DailyLimitExceeded`, confirmed from the
+  response body rather than inferred from the HTTP status alone.
 
 ### Idempotency
 
@@ -118,6 +129,23 @@ the point of this take-home is the middleware and claims handling, not an auth s
   webhook). Only `system` may call `POST /wallets/{id}/credit` — a customer cannot credit their
   own wallet directly, matching how money actually arrives in a real wallet.
 
+### Where the signing key lives
+
+`appsettings.json` ships with **no** `Jwt:SigningKey` at all, only `Issuer`/`Audience`/lifetime —
+the app fails fast at startup (a clear exception, not a silent fallback) if a key isn't supplied.
+`docker-compose.yml` supplies one directly as a static value, which is fine specifically *because*
+that container never leaves your machine and signs nothing anyone else ever verifies — it is
+explicitly commented in the compose file as local-only. Running via plain `dotnet run` instead of
+Docker needs one set separately:
+
+```bash
+dotnet user-secrets set "Jwt:SigningKey" "any-string-at-least-32-bytes-long-goes-here" --project src/Api/NovaWallet.Api
+```
+
+A real deployment would inject this from a secrets manager (Key Vault, Parameter Store, …), never
+from a config file or compose file — the split above exists so that habit is the *only* option for
+anything other than the local Docker Compose stack.
+
 ## Errors
 
 All failures are RFC 7807 Problem Details. Two independent paths produce them:
@@ -128,8 +156,11 @@ error rather than a warning).
 
 ## Stretch goals implemented
 
-- **Rate limiting** on `POST /api/transfers` specifically (fixed window, 30/min per authenticated
-  subject or IP) — the one endpoint a scripted client could otherwise hammer.
+- **Rate limiting** on `POST /api/transfers` specifically (fixed window, 30/min per customer,
+  partitioned on the JWT's `sub` claim — not `Identity.Name`, which this service's tokens never
+  populate and which would silently degrade to one shared per-IP budget for every customer behind
+  the same NAT/gateway; see AI_USAGE.md for how that was caught) — the one endpoint a scripted
+  client could otherwise hammer.
 - **Structured logging with correlation ids** — Serilog request logging plus a
   `CorrelationId` (the ASP.NET Core `TraceIdentifier`) pushed onto the log context for every
   request.

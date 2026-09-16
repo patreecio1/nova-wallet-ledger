@@ -88,3 +88,32 @@ own transaction is ever opened. This is documented inline in
 `TransferConcurrencyTests.Concurrent_replays_of_the_same_idempotency_key_only_apply_the_transfer_once`,
 which fires ten concurrent requests carrying the *same* key and asserts exactly one transfer is
 ever applied.
+
+## A third mistake, caught by writing a test for a claim that had never actually been tested
+
+The transfer handler's own doc-comment claimed that locking both wallets in ascending-Id order
+"rules out deadlocks between opposite-direction transfers of the same pair" — but until asked to
+close the gap, nothing actually exercised that specific scenario (transfers *from* A *to* B and
+*from* B *to* A, fired concurrently, many times). Writing
+`AdditionalConcurrencyTests.Opposite_direction_transfers_between_the_same_pair_never_deadlock_and_balances_reconcile`
+to test exactly that surfaced a real bug — just not the one being tested for.
+
+**The bug:** the rate limiter on `/api/transfers` partitions by `httpContext.User.Identity?.Name`,
+falling back to the caller's IP address. The JWT issued by this service never carries a
+"name"-typed claim — only `sub` (customer id) and `role` — so `Identity.Name` is *always* null,
+and the rate limiter *always* fell back to partitioning by IP. In the test, two different
+customers hitting the endpoint from the same test-server connection immediately tripped a shared
+30-requests/minute budget and got 429s, which looked at first exactly like a deadlock symptom
+(requests failing under concurrent load) until the actual status code was inspected.
+
+**Why it was unsafe:** in any real deployment, many customers sit behind the same NAT gateway or
+mobile carrier IP. The rate limit was never actually per-customer — it was per-IP, silently,
+meaning one customer's burst of activity (or a single scripted abuser) could throttle every other
+customer transacting from the same network. This is the opposite of what "rate-limit the transfer
+endpoint" is supposed to protect against.
+
+**How it was caught:** a test written for one specific concurrency claim (no deadlocks) failed for
+an unrelated reason (429s), and the fix was to actually read what status code came back rather
+than assume the failure confirmed the hypothesis being tested. **Fix:** partition on the JWT's
+`sub` claim directly instead of `Identity.Name`, so the limit is genuinely per-customer regardless
+of network topology.

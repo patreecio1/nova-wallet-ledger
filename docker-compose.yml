@@ -9,7 +9,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Default: "Host=postgres;Port=5432;Database=novawallet;Username=novawallet;Password=novawallet"
-      Jwt__SigningKey: "docker-compose_dev_only_signing_key_min_32_bytes!"
+      # This container never leaves your machine and signs nothing anyone else can verify
+      # against, so a static value here is fine -- unlike appsettings.json (which ships with
+      # NO signing key at all and fails fast at startup if one isn't supplied, see Program.cs).
+      # A real deployment injects this from a secrets manager, never from a compose file.
+      Jwt__SigningKey: "local-docker-compose-only-static-value-2f9a7c1e6b3d8f45"
       Jwt__Issuer: "novawallet-ledger"
       Jwt__Audience: "novawallet-clients"
 

@@ -35,9 +35,9 @@ public class TransferConcurrencyTests : IClassFixture<WalletApiFactory>
         var destinationToken = await _factory.IssueTokenAsync(setupClient, destinationCustomerId);
         var systemToken = await _factory.IssueTokenAsync(setupClient, Guid.NewGuid(), role: "system");
 
-        var sourceWallet = await CreateWalletAsync(sourceToken);
-        var destinationWallet = await CreateWalletAsync(destinationToken);
-        await CreditWalletAsync(systemToken, sourceWallet.WalletId, startingBalanceKobo);
+        var sourceWallet = await _factory.CreateWalletAsync(sourceToken);
+        var destinationWallet = await _factory.CreateWalletAsync(destinationToken);
+        await _factory.CreditWalletAsync(systemToken, sourceWallet.WalletId, startingBalanceKobo);
 
         // Fire every transfer attempt at once, each with its own Idempotency-Key (these are
         // twenty independent transfer requests, not retries of one request) and each on its
@@ -60,8 +60,8 @@ public class TransferConcurrencyTests : IClassFixture<WalletApiFactory>
         insufficientFundsCount.Should().Be(attemptedTransferCount - affordableTransferCount);
         responses.Should().OnlyContain(r => r.StatusCode == HttpStatusCode.OK || r.StatusCode == HttpStatusCode.Conflict);
 
-        var finalSource = await GetBalanceAsync(sourceToken, sourceWallet.WalletId);
-        var finalDestination = await GetBalanceAsync(destinationToken, destinationWallet.WalletId);
+        var finalSource = await _factory.GetBalanceAsync(sourceToken, sourceWallet.WalletId);
+        var finalDestination = await _factory.GetBalanceAsync(destinationToken, destinationWallet.WalletId);
 
         finalSource.BalanceKobo.Should().Be(0, "the source wallet must land at exactly zero, never negative");
         finalDestination.BalanceKobo.Should().Be(startingBalanceKobo, "every kobo debited from the source must show up on the destination — none lost, none duplicated");
@@ -78,9 +78,9 @@ public class TransferConcurrencyTests : IClassFixture<WalletApiFactory>
         var destinationToken = await _factory.IssueTokenAsync(setupClient, Guid.NewGuid());
         var systemToken = await _factory.IssueTokenAsync(setupClient, Guid.NewGuid(), role: "system");
 
-        var sourceWallet = await CreateWalletAsync(sourceToken);
-        var destinationWallet = await CreateWalletAsync(destinationToken);
-        await CreditWalletAsync(systemToken, sourceWallet.WalletId, transferAmountKobo * 5);
+        var sourceWallet = await _factory.CreateWalletAsync(sourceToken);
+        var destinationWallet = await _factory.CreateWalletAsync(destinationToken);
+        await _factory.CreditWalletAsync(systemToken, sourceWallet.WalletId, transferAmountKobo * 5);
 
         var idempotencyKey = $"replay-test-{Guid.NewGuid()}";
         var request = new TransferRequest(sourceWallet.WalletId, destinationWallet.WalletId, transferAmountKobo, "rent");
@@ -107,39 +107,7 @@ public class TransferConcurrencyTests : IClassFixture<WalletApiFactory>
         successfulBodies.Should().NotBeEmpty();
         successfulBodies.Select(b => b!.TransferId).Distinct().Should().ContainSingle("every successful reply must describe the same, single transfer");
 
-        var finalSource = await GetBalanceAsync(sourceToken, sourceWallet.WalletId);
+        var finalSource = await _factory.GetBalanceAsync(sourceToken, sourceWallet.WalletId);
         finalSource.BalanceKobo.Should().Be(transferAmountKobo * 5 - transferAmountKobo, "the replayed transfer must debit the wallet exactly once");
-    }
-
-    private async Task<WalletResponse> CreateWalletAsync(string token)
-    {
-        using var client = _factory.CreateAuthenticatedClient(token);
-        var response = await client.PostAsJsonAsync("/api/wallets", new { });
-        await EnsureSuccessAsync(response);
-        return (await response.Content.ReadFromJsonAsync<WalletResponse>())!;
-    }
-
-    private async Task CreditWalletAsync(string systemToken, Guid walletId, long amountKobo)
-    {
-        using var client = _factory.CreateAuthenticatedClient(systemToken);
-        var response = await client.PostAsJsonAsync($"/api/wallets/{walletId}/credit", new { amountKobo, reference = "seed-balance" });
-        await EnsureSuccessAsync(response);
-    }
-
-    private async Task<WalletResponse> GetBalanceAsync(string token, Guid walletId)
-    {
-        using var client = _factory.CreateAuthenticatedClient(token);
-        var response = await client.GetAsync($"/api/wallets/{walletId}/balance");
-        await EnsureSuccessAsync(response);
-        return (await response.Content.ReadFromJsonAsync<WalletResponse>())!;
-    }
-
-    private static async Task EnsureSuccessAsync(HttpResponseMessage response)
-    {
-        if (response.IsSuccessStatusCode)
-            return;
-
-        var body = await response.Content.ReadAsStringAsync();
-        throw new HttpRequestException($"{(int)response.StatusCode} {response.StatusCode}: {body}");
     }
 }

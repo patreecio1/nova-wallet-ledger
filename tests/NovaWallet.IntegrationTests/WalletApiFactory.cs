@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using NovaWallet.Wallet.Application.Features.CreateWallet;
 using Testcontainers.PostgreSql;
 
 namespace NovaWallet.IntegrationTests;
@@ -58,6 +59,38 @@ public sealed class WalletApiFactory : WebApplicationFactory<Program>, IAsyncLif
         var client = CreateClient();
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
         return client;
+    }
+
+    public async Task<WalletResponse> CreateWalletAsync(string token)
+    {
+        using var client = CreateAuthenticatedClient(token);
+        var response = await client.PostAsJsonAsync("/api/wallets", new { });
+        await EnsureSuccessAsync(response);
+        return (await response.Content.ReadFromJsonAsync<WalletResponse>())!;
+    }
+
+    public async Task CreditWalletAsync(string systemToken, Guid walletId, long amountKobo)
+    {
+        using var client = CreateAuthenticatedClient(systemToken);
+        var response = await client.PostAsJsonAsync($"/api/wallets/{walletId}/credit", new { amountKobo, reference = "seed-balance" });
+        await EnsureSuccessAsync(response);
+    }
+
+    public async Task<WalletResponse> GetBalanceAsync(string token, Guid walletId)
+    {
+        using var client = CreateAuthenticatedClient(token);
+        var response = await client.GetAsync($"/api/wallets/{walletId}/balance");
+        await EnsureSuccessAsync(response);
+        return (await response.Content.ReadFromJsonAsync<WalletResponse>())!;
+    }
+
+    public static async Task EnsureSuccessAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+            return;
+
+        var body = await response.Content.ReadAsStringAsync();
+        throw new HttpRequestException($"{(int)response.StatusCode} {response.StatusCode}: {body}");
     }
 
     private sealed record TokenResponse(string AccessToken, DateTime ExpiresAtUtc);
