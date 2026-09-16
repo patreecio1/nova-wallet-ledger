@@ -14,6 +14,7 @@ using NovaWallet.Wallet.API;
 using NovaWallet.Wallet.Application.Abstractions;
 using NovaWallet.Wallet.Infrastructure;
 using NovaWallet.Wallet.Infrastructure.Persistence;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Context;
 
@@ -142,8 +143,15 @@ app.UseSerilogRequestLogging();
 
 if (!app.Environment.IsProduction())
 {
+    // Swashbuckle still generates the OpenAPI document (net8.0's Microsoft.AspNetCore.OpenApi
+    // package doesn't yet ship the native AddOpenApi()/MapOpenApi() generator — that's a .NET 9
+    // addition) — but it's Scalar, not Swagger's own UI, serving it.
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json");
+        options.Title = "NovaWallet Ledger Service";
+    });
 }
 
 app.UseAuthentication();

@@ -21,7 +21,7 @@ src/
     NovaWallet.Wallet.Application/          # one file per feature: command/query + validator + handler
     NovaWallet.Wallet.Infrastructure/        # EF Core, the repository, idempotency store, migrations
     NovaWallet.Wallet.API/                  # Carter endpoints, request/response contracts
-  Api/NovaWallet.Api/                       # composition root: Program.cs, JWT, Swagger, health checks
+  Api/NovaWallet.Api/                       # composition root: Program.cs, JWT, Scalar API docs, health checks
 tests/
   NovaWallet.Wallet.UnitTests/              # domain invariants, handler logic (mocked repo), validators
   NovaWallet.IntegrationTests/               # real Postgres via Testcontainers, real HTTP, real concurrency
@@ -161,7 +161,8 @@ docker compose up --build
 This builds the API image, starts Postgres, waits for Postgres's health check, and runs EF Core
 migrations automatically at API startup (see `Program.cs`) — no separate migration step. Once up:
 
-- Swagger UI: http://localhost:8080/swagger
+- API docs (Scalar): http://localhost:8080/scalar
+- Raw OpenAPI document: http://localhost:8080/swagger/v1/swagger.json
 - Health: http://localhost:8080/health/live, http://localhost:8080/health/ready
 
 Get a token, then call the API:
