@@ -192,8 +192,9 @@ docker compose up --build
 This builds the API image, starts Postgres, waits for Postgres's health check, and runs EF Core
 migrations automatically at API startup (see `Program.cs`) — no separate migration step. Once up:
 
-- API docs (Scalar): http://localhost:8080/scalar
-- Raw OpenAPI document: http://localhost:8080/swagger/v1/swagger.json
+- **OpenAPI/Swagger spec, reachable while running** (per the brief's deliverables list):
+  - Interactive docs (Scalar UI): http://localhost:8080/scalar
+  - Raw OpenAPI/Swagger document: http://localhost:8080/swagger/v1/swagger.json
 - Health: http://localhost:8080/health/live, http://localhost:8080/health/ready
 
 Get a token, then call the API:
