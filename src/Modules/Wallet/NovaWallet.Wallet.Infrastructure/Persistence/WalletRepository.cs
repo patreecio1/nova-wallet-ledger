@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NovaWallet.BuildingBlocks.Application.Paging;
+using NovaWallet.BuildingBlocks.Domain.Outbox;
 using NovaWallet.Wallet.Application.Abstractions;
 using NovaWallet.Wallet.Domain;
 
@@ -33,6 +34,15 @@ public sealed class WalletRepository(WalletDbContext dbContext) : IWalletReposit
     public void AddLedgerEntry(LedgerEntry entry) => dbContext.LedgerEntries.Add(entry);
 
     public void AddAuditEntry(AuditEntry entry) => dbContext.AuditEntries.Add(entry);
+
+    public void AddOutboxMessage(OutboxMessage message) => dbContext.OutboxMessages.Add(message);
+
+    public async Task<IReadOnlyList<OutboxMessage>> GetPendingOutboxMessagesAsync(int batchSize, CancellationToken cancellationToken) =>
+        await dbContext.OutboxMessages
+            .Where(m => m.ProcessedOnUtc == null)
+            .OrderBy(m => m.OccurredOnUtc)
+            .Take(batchSize)
+            .ToListAsync(cancellationToken);
 
     public async Task<PagedResult<LedgerEntry>> GetStatementAsync(Guid walletId, PageRequest page, CancellationToken cancellationToken)
     {

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using NovaWallet.BuildingBlocks.Domain.Outbox;
 using NovaWallet.Wallet.Application.Abstractions;
 using NovaWallet.Wallet.Application.Features.Transfer;
 using NovaWallet.Wallet.Domain;
@@ -71,6 +72,38 @@ public class TransferCommandHandlerTests
         source.BalanceKobo.Should().Be(3_000_00);
         destination.BalanceKobo.Should().Be(2_000_00);
         result.Value.AmountKobo.Should().Be(2_000_00);
+    }
+
+    [Fact]
+    public async Task A_successful_transfer_writes_a_TransferCompleted_outbox_message()
+    {
+        var (source, destination) = SeedWallets(sourceBalanceKobo: 5_000_00);
+        var command = new TransferCommand(source.CustomerId, source.Id, destination.Id, 2_000_00, "rent", "key-outbox-1");
+
+        await _handler.Handle(command, CancellationToken.None);
+
+        _repository.Received(1).AddOutboxMessage(Arg.Is<OutboxMessage>(m =>
+            m.Type == "TransferCompletedIntegrationEvent"
+            && m.Content.Contains(source.Id.ToString())
+            && m.Content.Contains(destination.Id.ToString())
+            && m.Content.Contains("200000"))); // 2_000_00 kobo, serialized
+    }
+
+    [Fact]
+    public async Task Replaying_the_same_idempotency_key_does_not_enqueue_a_second_outbox_message()
+    {
+        var (source, destination) = SeedWallets(sourceBalanceKobo: 5_000_00);
+        var command = new TransferCommand(source.CustomerId, source.Id, destination.Id, 1_000_00, null, "outbox-replay-key");
+
+        await _handler.Handle(command, CancellationToken.None);
+        var cachedPayload = GetLastCompletedPayload();
+        _idempotencyStore
+            .TryClaimAsync("outbox-replay-key", Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new IdempotencyClaim(IdempotencyOutcome.Completed, cachedPayload));
+
+        await _handler.Handle(command, CancellationToken.None);
+
+        _repository.Received(1).AddOutboxMessage(Arg.Any<OutboxMessage>());
     }
 
     [Fact]

@@ -166,12 +166,31 @@ error rather than a warning).
   request.
 - **Health endpoints** — `/health/live` and `/health/ready` (the latter checks Postgres
   connectivity), suitable for container orchestration probes.
+- **Outbox pattern publishing a `TransferCompleted` event** — see below.
 
-Not implemented: the outbox pattern / `TransferCompleted` event. Given the time box, the idempotent
-transfer + statement/audit trail felt like the higher-value correctness work for a ledger
-specifically; publishing an integration event would be the natural next addition (an
-`OutboxMessages` table written in the same transaction as the transfer, drained by a background
-job) and is called out here rather than half-implemented.
+### Outbox pattern
+
+`TransferCommandHandler` writes an `OutboxMessage` row (`BuildingBlocks.Domain.Outbox`) in the
+**same transaction** as the transfer itself — so "the transfer happened" and "an event describing
+it exists to be published" either both commit or both roll back. There is no window where a
+transfer succeeds but the event is silently lost, and — because it's only written on the branch
+that actually moves money — no window where an idempotent replay produces a second one either.
+
+A separate `OutboxDispatcherHostedService` (a `BackgroundService`, one per running instance) polls
+for unpublished rows every 5 seconds and hands them to `IIntegrationEventPublisher`. That interface
+is a one-line seam: this take-home has no real message broker or downstream module to integrate
+with, so the implementation wired up (`LoggingIntegrationEventPublisher`) just logs the event
+structurally — but it's the *only* thing a real deployment would need to replace (with a Kafka/SQS/
+Azure Service Bus producer, or a webhook to e.g. NovaLend) to make this a genuine cross-module
+integration. The polling/marking-processed/retry-on-failure logic (`OutboxProcessor`) doesn't
+change either way, and is unit-tested independently of the publisher and independently of the
+timer that drives it.
+
+Proven, not just wired up: `OutboxTests.A_successful_transfer_writes_an_outbox_message_that_the_background_dispatcher_publishes`
+performs a real transfer over HTTP, confirms the outbox row exists immediately, then waits on the
+*real* `OutboxDispatcherHostedService` running inside the test host (not invoked manually) to mark
+it processed — and the docker-compose stack's own container logs show the same thing happening
+against the actual deployed image.
 
 ## Assumptions made
 

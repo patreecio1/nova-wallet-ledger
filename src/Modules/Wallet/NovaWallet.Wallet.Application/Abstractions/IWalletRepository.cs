@@ -1,4 +1,5 @@
 using NovaWallet.BuildingBlocks.Application.Paging;
+using NovaWallet.BuildingBlocks.Domain.Outbox;
 using NovaWallet.Wallet.Domain;
 
 namespace NovaWallet.Wallet.Application.Abstractions;
@@ -20,6 +21,12 @@ public interface IWalletRepository
     void AddLedgerEntry(LedgerEntry entry);
 
     void AddAuditEntry(AuditEntry entry);
+
+    /// <summary>Written in the same transaction as the business change it describes — see OutboxMessage.</summary>
+    void AddOutboxMessage(OutboxMessage message);
+
+    /// <summary>The oldest <paramref name="batchSize"/> not-yet-published messages, for the dispatcher to attempt next.</summary>
+    Task<IReadOnlyList<OutboxMessage>> GetPendingOutboxMessagesAsync(int batchSize, CancellationToken cancellationToken);
 
     Task<PagedResult<LedgerEntry>> GetStatementAsync(Guid walletId, PageRequest page, CancellationToken cancellationToken);
 

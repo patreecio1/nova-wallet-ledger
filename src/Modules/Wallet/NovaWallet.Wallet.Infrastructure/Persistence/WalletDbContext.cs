@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using NovaWallet.BuildingBlocks.Domain.Outbox;
 using NovaWallet.BuildingBlocks.Infrastructure.Persistence;
 using NovaWallet.Wallet.Domain;
 
@@ -18,6 +19,8 @@ public sealed class WalletDbContext(DbContextOptions<WalletDbContext> options) :
     public DbSet<AuditEntry> AuditEntries => Set<AuditEntry>();
 
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +62,18 @@ public sealed class WalletDbContext(DbContextOptions<WalletDbContext> options) :
             builder.Property(i => i.Key).HasMaxLength(200);
             builder.Property(i => i.RequestHash).HasMaxLength(128).IsRequired();
             builder.Property(i => i.ResponsePayload).HasColumnType("jsonb");
+        });
+
+        modelBuilder.Entity<OutboxMessage>(builder =>
+        {
+            builder.ToTable("outbox_messages");
+            builder.HasKey(m => m.Id);
+            builder.Property(m => m.Type).HasMaxLength(200).IsRequired();
+            builder.Property(m => m.Content).HasColumnType("jsonb").IsRequired();
+            builder.Property(m => m.Error).HasMaxLength(2000);
+            // The dispatcher's only query is "oldest unprocessed rows first" — a partial index
+            // keeps that fast without bloating as processed messages pile up.
+            builder.HasIndex(m => m.OccurredOnUtc).HasFilter("\"ProcessedOnUtc\" IS NULL");
         });
 
         base.OnModelCreating(modelBuilder);

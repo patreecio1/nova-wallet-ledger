@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using FluentValidation;
 using NovaWallet.BuildingBlocks.Application.CQRS;
+using NovaWallet.BuildingBlocks.Domain.Events;
+using NovaWallet.BuildingBlocks.Domain.Outbox;
 using NovaWallet.BuildingBlocks.Domain.Results;
 using NovaWallet.Wallet.Application.Abstractions;
 using NovaWallet.Wallet.Domain;
@@ -24,6 +26,20 @@ public sealed record TransferResponse(
     long AmountKobo,
     long SourceBalanceAfterKobo,
     DateTime CreatedAtUtc);
+
+/// <summary>
+/// The stretch-goal integration event: written to the outbox in the same transaction as the
+/// transfer itself (see ExecuteTransferAsync), never on an idempotent replay — only the request
+/// that actually moved money produces one. A real deployment's dispatcher would publish this to
+/// a broker or webhook for other modules (e.g. NovaLend's credit scoring) to react to.
+/// </summary>
+public sealed record TransferCompletedIntegrationEvent(
+    Guid EventId,
+    Guid TransferId,
+    Guid SourceWalletId,
+    Guid DestinationWalletId,
+    long AmountKobo,
+    DateTime OccurredOnUtc) : IIntegrationEvent;
 
 public sealed class TransferCommandValidator : AbstractValidator<TransferCommand>
 {
@@ -123,6 +139,12 @@ public sealed class TransferCommandHandler(IWalletRepository repository, IIdempo
 
         repository.AddAuditEntry(AuditEntry.Create(source.Id, "TransferDebited", request.AmountKobo, sourceBalanceBefore, source.BalanceKobo, request.CallerCustomerId, transferId, utcNow));
         repository.AddAuditEntry(AuditEntry.Create(destination.Id, "TransferCredited", request.AmountKobo, destinationBalanceBefore, destination.BalanceKobo, request.CallerCustomerId, transferId, utcNow));
+
+        var integrationEvent = new TransferCompletedIntegrationEvent(Guid.NewGuid(), transferId, source.Id, destination.Id, request.AmountKobo, utcNow);
+        repository.AddOutboxMessage(OutboxMessage.Create(
+            type: nameof(TransferCompletedIntegrationEvent),
+            content: JsonSerializer.Serialize(integrationEvent, JsonOptions),
+            occurredOnUtc: utcNow));
 
         return Result.Success(new TransferResponse(transferId, source.Id, destination.Id, request.AmountKobo, source.BalanceKobo, utcNow));
     }

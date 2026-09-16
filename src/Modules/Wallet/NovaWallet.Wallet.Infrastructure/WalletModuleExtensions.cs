@@ -5,7 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using NovaWallet.BuildingBlocks.Infrastructure.Persistence;
 using NovaWallet.Wallet.Application.Abstractions;
 using NovaWallet.Wallet.Application.Features.CreateWallet;
+using NovaWallet.Wallet.Application.Outbox;
 using NovaWallet.Wallet.Infrastructure.Idempotency;
+using NovaWallet.Wallet.Infrastructure.Outbox;
 using NovaWallet.Wallet.Infrastructure.Persistence;
 
 namespace NovaWallet.Wallet.Infrastructure;
@@ -25,6 +27,14 @@ public static class WalletModuleExtensions
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddSingleton<IClock, SystemClock>();
+
+        // Transactional outbox: TransferCommandHandler writes an OutboxMessage in the same
+        // transaction as the transfer; this dispatcher polls for unpublished ones and hands them
+        // to IIntegrationEventPublisher (a logger for this take-home — see
+        // LoggingIntegrationEventPublisher for what a real deployment would swap in instead).
+        services.AddScoped<IIntegrationEventPublisher, LoggingIntegrationEventPublisher>();
+        services.AddScoped<OutboxProcessor>();
+        services.AddHostedService<OutboxDispatcherHostedService>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateWalletCommand).Assembly));
         services.AddValidatorsFromAssembly(typeof(CreateWalletCommand).Assembly);
